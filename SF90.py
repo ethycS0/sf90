@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 import json
 import pickle
 import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ML modules/libraries
 import numpy as np
@@ -25,6 +26,42 @@ import seaborn as sns
 from sklearn import metrics 
 import warnings
 warnings.filterwarnings('ignore')
+
+hostName = "0.0.0.0"
+serverPort = 8898
+
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        url = self.path[1:]
+        # print(self.path[1:])
+        loaded_model = pickle.load(open("models/gbcModel.pkl", "rb"))
+        obj = FeaturesFinder(url)
+        Features = obj.getFeaturesList()
+        print(Features)
+        start_time = time.time()
+        url = Features.pop(0)
+        y_predicted = loaded_model.predict([Features])
+        print("Prediction processing finished --- %s seconds ---" % (time.time() - start_time))
+        print("URL is: ", y_predicted)
+        if y_predicted == 1:
+            print("URL '"+url+"' is safe!")
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(bytes("is safe", "utf-8"))
+        elif y_predicted == 0:
+            print("URL '"+url+"' is suspicious!")
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(bytes("is suspicious", "utf-8"))
+        elif y_predicted == -1:
+            print("URL '"+url+"' is malicious!")
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(bytes("malicious", "utf-8"))
+
 
 class FeaturesFinder:
     features = []
@@ -390,9 +427,9 @@ class FeaturesFinder:
     def IframeRedirection(self):
         try:
             if re.findall(r"[<iframe>|<frameBorder>]", self.response.text):
-                return 1
-            else:
                 return -1
+            else:
+                return 1
         except:
              return -1
 
@@ -460,12 +497,12 @@ class FeaturesFinder:
                 return 1
             return 0
         except:
-            return -1
+            return 0
 
     # 27. PageRank
     def PageRank(self):
         try:
-            for i in GoogleSearch(self.domain, sleep_interval=5, num_results=5):
+            for i in search(self.domain, sleep_interval=5, num_results=5):
                 parsed = urlparse(i)
                 parseddom = parsed.netloc
                 if parseddom == self.domain:
@@ -478,7 +515,7 @@ class FeaturesFinder:
     # 28. GoogleIndex
     def GoogleIndex(self):
         try:
-            for i in GoogleSearch(self.domain, sleep_interval=3, num_results=3):
+            for i in search(self.domain, sleep_interval=3, num_results=3):
                 parsed = urlparse(i)
                 parseddom = parsed.netloc
                 if parseddom == self.domain:
@@ -525,32 +562,20 @@ class FeaturesFinder:
         print("Prediction processing finished --- %s seconds ---" % (time.time() - self.start_time))
         return self.features
 
-url = input("Enter URL: ")
-loaded_model = pickle.load(open("models/gbcModel.pkl", "rb"))
-obj = FeaturesFinder(url)
-Features = obj.getFeaturesList()
-print(Features)
-start_time = time.time()
-url = Features.pop(0)
-y_predicted = loaded_model.predict([Features])
-print("Prediction processing finished --- %s seconds ---" % (time.time() - start_time))
-print("URL is: ", y_predicted)
-if y_predicted == 1:
-    print("URL '"+url+"' is safe!")
-elif y_predicted == 0:
-    print("URL '"+url+"' is suspicious!")
-elif y_predicted == -1:
-    print("URL '"+url+"' is malicious!")
+webServer = HTTPServer((hostName, serverPort), MyServer)
+print("Server started http://%s:%s" % (hostName, serverPort))
+webServer.serve_forever()
+    
 
 # Choose coloumns, 1 for usual searching and 2 for spreadsheet paste
 
 # 1
-column_names = ["UsingIP","LongURL","ShortURL","Symbol@","Redirecting//","PrefixSuffix","SubDomains","HTTPS","DomainRegLen","Favicon","NonStdPort","HTTPSDomainURL","RequestURL","AnchorURL","LinksInScriptTags","ServerFormHandler","InfoEmail","AbnormalURL","WebsiteForwarding","StatusBarCust","DisableRightClick","UsingPopupWindow","IframeRedirection","AgeofDomain","DNSRecording","WebsiteTraffic","PageRank","GoogleIndex","LinksPointingToPage","StatsReport"]
+# column_names = ["UsingIP","LongURL","ShortURL","Symbol@","Redirecting//","PrefixSuffix","SubDomains","HTTPS","DomainRegLen","Favicon","NonStdPort","HTTPSDomainURL","RequestURL","AnchorURL","LinksInScriptTags","ServerFormHandler","InfoEmail","AbnormalURL","WebsiteForwarding","StatusBarCust","DisableRightClick","UsingPopupWindow","IframeRedirection","AgeofDomain","DNSRecording","WebsiteTraffic","PageRank","GoogleIndex","LinksPointingToPage","StatsReport"]
 
 # 2
 # column_names = ["","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
 
-for n, v in zip(column_names, Features):
-   print("{}={}".format(n, v))
+# for n, v in zip(column_names, Features):
+#    print("{}{}".format(n, v))
 
 
