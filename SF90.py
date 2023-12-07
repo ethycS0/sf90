@@ -1,3 +1,4 @@
+# Install all modules using pip install (search package name on google and install it eg "pip install bs4")
 
 # Script modules/libraries
 import ipaddress
@@ -525,7 +526,7 @@ class FeaturesFinder:
         return self.features
 
 url = input("Enter URL: ")
-loaded_model = pickle.load(open("/home/arjun/Sync/Notes/SF90/models/gbcModel.pkl", "rb"))
+loaded_model = pickle.load(open("models/gbcModel.pkl", "rb"))
 obj = FeaturesFinder(url)
 Features = obj.getFeaturesList()
 print(Features)
@@ -541,11 +542,15 @@ elif y_predicted == 0:
 elif y_predicted == -1:
     print("URL '"+url+"' is malicious!")
 
+# Choose coloumns, 1 for usual searching and 2 for spreadsheet paste
 
-# column_names = ["UsingIP","LongURL","ShortURL","Symbol@","Redirecting//","PrefixSuffix","SubDomains","HTTPS","DomainRegLen","Favicon","NonStdPort","HTTPSDomainURL","RequestURL","AnchorURL","LinksInScriptTags","ServerFormHandler","InfoEmail","AbnormalURL","WebsiteForwarding","StatusBarCust","DisableRightClick","UsingPopupWindow","IframeRedirection","AgeofDomain","DNSRecording","WebsiteTraffic","PageRank","GoogleIndex","LinksPointingToPage","StatsReport"]
-# column_names = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"]
-column_names = ["","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+# 1
+column_names = ["UsingIP","LongURL","ShortURL","Symbol@","Redirecting//","PrefixSuffix","SubDomains","HTTPS","DomainRegLen","Favicon","NonStdPort","HTTPSDomainURL","RequestURL","AnchorURL","LinksInScriptTags","ServerFormHandler","InfoEmail","AbnormalURL","WebsiteForwarding","StatusBarCust","DisableRightClick","UsingPopupWindow","IframeRedirection","AgeofDomain","DNSRecording","WebsiteTraffic","PageRank","GoogleIndex","LinksPointingToPage","StatsReport"]
+
+# 2
+# column_names = ["","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+
 for n, v in zip(column_names, Features):
-   print("{}{}".format(n, v))
+   print("{}={}".format(n, v))
 
 
