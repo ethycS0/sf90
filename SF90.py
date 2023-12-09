@@ -34,7 +34,7 @@ class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         url = self.path[1:]
         # print(self.path[1:])
-        loaded_model = pickle.load(open("models/gbcModel.pkl", "rb"))
+        loaded_model = pickle.load(open("models/main.pkl", "rb"))
         obj = FeaturesFinder(url)
         Features = obj.getFeaturesList()
         print(Features)
@@ -104,7 +104,7 @@ class FeaturesFinder:
         self.features.append(self.DomainRegLen())
         self.features.append(self.Favicon())
         self.features.append(self.NonStdPort())
-        self.features.append(self.HTTPSDomainURL())
+        # self.features.append(self.HTTPSDomainURL())
         self.features.append(self.RequestURL())
         self.features.append(self.AnchorURL())
         self.features.append(self.LinksInScriptTags())
@@ -118,11 +118,11 @@ class FeaturesFinder:
         self.features.append(self.IframeRedirection())
         self.features.append(self.AgeofDomain())
         self.features.append(self.DNSRecording())
-        self.features.append(self.WebsiteTraffic())
+        # self.features.append(self.WebsiteTraffic())
         self.features.append(self.PageRank())
         self.features.append(self.GoogleIndex())
         self.features.append(self.LinksPointingToPage())
-        self.features.append(self.StatsReport())
+        # self.features.append(self.StatsReport())
 
 
     # 1.Using IP
@@ -149,7 +149,7 @@ class FeaturesFinder:
                     'doiop\.com|short\.ie|kl\.am|wp\.me|rubyurl\.com|om\.ly|to\.ly|bit\.do|t\.co|lnkd\.in|'
                     'db\.tt|qr\.ae|adf\.ly|goo\.gl|bitly\.com|cur\.lv|tinyurl\.com|ow\.ly|bit\.ly|ity\.im|'
                     'q\.gs|is\.gd|po\.st|bc\.vc|twitthis\.com|u\.to|j\.mp|buzurl\.com|cutt\.us|u\.bb|yourls\.org|'
-                    'x\.co|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip\.net', self.url)
+                    'x\.co|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip\.net', self.domain)
         if match:
             return -1
         return 1
@@ -189,12 +189,17 @@ class FeaturesFinder:
     # 8.HTTPS
     def https(self):
         try:
-            https = self.urlparse.scheme
-            if 'https' in https:
+            response = requests.head(self.url, allow_redirects=True, timeout=5)
+            final_url = response.url
+
+            if final_url.startswith('https://'):
                 return 1
-            return -1
+            else:
+                return -1
         except:
-            return 1
+            return -1
+
+
 
     # 9.DomainRegLen
     def DomainRegLen(self):
@@ -242,13 +247,13 @@ class FeaturesFinder:
             return -1
 
     # 12. HTTPSDomainURL
-    def HTTPSDomainURL(self):
-        try:
-            if 'https' in self.domain:
-                return -1
-            return 1
-        except:
-            return -1
+    # def HTTPSDomainURL(self):
+    #     try:
+    #         if 'https' in self.domain:
+    #             return -1
+    #         return 1
+    #     except:
+    #         return -1
     
     # 13. RequestURL
     def RequestURL(self):
@@ -470,34 +475,34 @@ class FeaturesFinder:
             return -1
 
     # 26. WebsiteTraffic   
-    def WebsiteTraffic(self):
-        try:
-            response = requests.post("https://websiteseochecker.com/website-traffic-checker/", {"ckwebsite": self.domain})
-            time.sleep(3)
-            html = response.text
-            soup = BeautifulSoup(html, "html.parser")
+    # def WebsiteTraffic(self):
+    #     try:
+    #         response = requests.post("https://websiteseochecker.com/website-traffic-checker/", {"ckwebsite": self.domain})
+    #         time.sleep(3)
+    #         html = response.text
+    #         soup = BeautifulSoup(html, "html.parser")
 
-            table = soup.find('table')
+    #         table = soup.find('table')
 
-            header = []
-            rows = []
-            for i, row in enumerate(table.find_all('tr')):
-                if i == 0:
-                    header = [el.text.strip() for el in row.find_all('th')]
-                else:
-                    rows.append([el.text.strip() for el in row.find_all('td')])
+    #         header = []
+    #         rows = []
+    #         for i, row in enumerate(table.find_all('tr')):
+    #             if i == 0:
+    #                 header = [el.text.strip() for el in row.find_all('th')]
+    #             else:
+    #                 rows.append([el.text.strip() for el in row.find_all('td')])
 
-            a = 0
-            for row in rows:
-                a += 1
-                if a == 2:
-                    traffic = row[2]
+    #         a = 0
+    #         for row in rows:
+    #             a += 1
+    #             if a == 2:
+    #                 traffic = row[2]
 
-            if int(traffic) > 150:
-                return 1
-            return 0
-        except:
-            return 0
+    #         if int(traffic) > 150:
+    #             return 1
+    #         return 0
+    #     except:
+    #         return 0
 
     # 27. PageRank
     def PageRank(self):
@@ -539,28 +544,35 @@ class FeaturesFinder:
             return -1
 
     # 30. StatsReport
-    def StatsReport(self):
-        try:
-            url_match = re.search(
-          'at\.ua|usa\.cc|baltazarpresentes\.com\.br|pe\.hu|esy\.es|hol\.es|sweddy\.com|myjino\.ru|96\.lt|ow\.ly', self.url)
-            ip_address = socket.gethostbyname(self.domain)
-            ip_match = re.search('146\.112\.61\.108|213\.174\.157\.151|121\.50\.168\.88|192\.185\.217\.116|78\.46\.211\.158|181\.174\.165\.13|46\.242\.145\.103|121\.50\.168\.40|83\.125\.22\.219|46\.242\.145\.98|'
-                                '107\.151\.148\.44|107\.151\.148\.107|64\.70\.19\.203|199\.184\.144\.27|107\.151\.148\.108|107\.151\.148\.109|119\.28\.52\.61|54\.83\.43\.69|52\.69\.166\.231|216\.58\.192\.225|'
-                                '118\.184\.25\.86|67\.208\.74\.71|23\.253\.126\.58|104\.239\.157\.210|175\.126\.123\.219|141\.8\.224\.221|10\.10\.10\.10|43\.229\.108\.32|103\.232\.215\.140|69\.172\.201\.153|'
-                                '216\.218\.185\.162|54\.225\.104\.146|103\.243\.24\.98|199\.59\.243\.120|31\.170\.160\.61|213\.19\.128\.77|62\.113\.226\.131|208\.100\.26\.234|195\.16\.127\.102|195\.16\.127\.157|'
-                                '34\.196\.13\.28|103\.224\.212\.222|172\.217\.4\.225|54\.72\.9\.51|192\.64\.147\.141|198\.200\.56\.183|23\.253\.164\.103|52\.48\.191\.26|52\.214\.197\.72|87\.98\.255\.18|209\.99\.17\.27|'
-                                '216\.38\.62\.18|104\.130\.124\.96|47\.89\.58\.141|78\.46\.211\.158|54\.86\.225\.156|54\.82\.156\.19|37\.157\.192\.102|204\.11\.56\.48|110\.34\.231\.42', ip_address)
-            if url_match:
-                return -1
-            elif ip_match:
-                return -1
-            return 1
-        except:
-            return 1
+    # def StatsReport(self):
+    #     try:
+    #         url_match = re.search(
+    #       'at\.ua|usa\.cc|baltazarpresentes\.com\.br|pe\.hu|esy\.es|hol\.es|sweddy\.com|myjino\.ru|96\.lt|ow\.ly', self.url)
+    #         ip_address = socket.gethostbyname(self.domain)
+    #         ip_match = re.search('146\.112\.61\.108|213\.174\.157\.151|121\.50\.168\.88|192\.185\.217\.116|78\.46\.211\.158|181\.174\.165\.13|46\.242\.145\.103|121\.50\.168\.40|83\.125\.22\.219|46\.242\.145\.98|'
+    #                             '107\.151\.148\.44|107\.151\.148\.107|64\.70\.19\.203|199\.184\.144\.27|107\.151\.148\.108|107\.151\.148\.109|119\.28\.52\.61|54\.83\.43\.69|52\.69\.166\.231|216\.58\.192\.225|'
+    #                             '118\.184\.25\.86|67\.208\.74\.71|23\.253\.126\.58|104\.239\.157\.210|175\.126\.123\.219|141\.8\.224\.221|10\.10\.10\.10|43\.229\.108\.32|103\.232\.215\.140|69\.172\.201\.153|'
+    #                             '216\.218\.185\.162|54\.225\.104\.146|103\.243\.24\.98|199\.59\.243\.120|31\.170\.160\.61|213\.19\.128\.77|62\.113\.226\.131|208\.100\.26\.234|195\.16\.127\.102|195\.16\.127\.157|'
+    #                             '34\.196\.13\.28|103\.224\.212\.222|172\.217\.4\.225|54\.72\.9\.51|192\.64\.147\.141|198\.200\.56\.183|23\.253\.164\.103|52\.48\.191\.26|52\.214\.197\.72|87\.98\.255\.18|209\.99\.17\.27|'
+    #                             '216\.38\.62\.18|104\.130\.124\.96|47\.89\.58\.141|78\.46\.211\.158|54\.86\.225\.156|54\.82\.156\.19|37\.157\.192\.102|204\.11\.56\.48|110\.34\.231\.42', ip_address)
+    #         if url_match:
+    #             return -1
+    #         elif ip_match:
+    #             return -1
+    #         return 1
+    #     except:
+    #         return 1
     
     def getFeaturesList(self):
+
         print("Prediction processing finished --- %s seconds ---" % (time.time() - self.start_time))
-        return self.features
+#         return self.features
+        try:
+            responsel = requests.get(self.url, timeout=20)
+            return self.features
+
+        except RequestException as e:
+            print(f"Error extracting features from {self.url}: {e}")
 
 webServer = HTTPServer((hostName, serverPort), MyServer)
 print("Server started http://%s:%s" % (hostName, serverPort))

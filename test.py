@@ -1,27 +1,26 @@
-import ipaddress
-import re
-from googlesearch import search
-import urllib.request
-from bs4 import BeautifulSoup
-import socket
 import requests
-import whois
-from datetime import date, datetime
-import time
-from dateutil.parser import parse as date_parse
-from urllib.parse import urlparse
-import json
-import pickle
-import time
-import sys
 
-success = 0
-i=0
-url =""
-response = requests.get(url)
-soup = BeautifulSoup(response.text, 'html.parser')
-urlparse = urlparse(url)
-domain = urlparse.netloc
+url = "https://api.similarweb.com/v3/batch/traffic_and_engagement/request-report"
 
-whois_response = whois.query(domain)
-print(response.history)
+payload = {
+    "metrics": ["all_traffic_visits", "global_rank", "desktop_new_visitors", "mobile_average_visit_duration"],
+    "filters": {
+        "domains": ["facebook.com"],
+        "countries": ["WW"],
+        "include_subdomains": True
+    },
+    "granularity": "monthly",
+    "start_date": "2022-06",
+    "end_date": "2023-06",
+    "response_format": "csv",
+    "delivery_method": "download_link"
+}
+headers = {
+    "accept": "application/json",
+    "api-key": "Batch API Key",
+    "content-type": "application/json"
+}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.text)
