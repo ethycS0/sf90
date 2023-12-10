@@ -28,7 +28,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 hostName = "0.0.0.0"
-serverPort = 8000
+serverPort = 8898
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
