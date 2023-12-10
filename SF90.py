@@ -566,13 +566,13 @@ class FeaturesFinder:
     def getFeaturesList(self):
 
         print("Prediction processing finished --- %s seconds ---" % (time.time() - self.start_time))
-#         return self.features
-        try:
-            responsel = requests.get(self.url, timeout=20)
-            return self.features
+        return self.features
+        # try:
+        #     responsel = requests.get(self.url, timeout=20)
+        #     return self.features
 
-        except RequestException as e:
-            print(f"Error extracting features from {self.url}: {e}")
+        # except RequestException as e:
+        #     print(f"Error extracting features from {self.url}: {e}")
 
 webServer = HTTPServer((hostName, serverPort), MyServer)
 print("Server started http://%s:%s" % (hostName, serverPort))
