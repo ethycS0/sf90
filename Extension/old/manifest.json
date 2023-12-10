@@ -3,9 +3,9 @@
   "name": "SF90",
   "version": "1.0",
   "description": "",
-  "permissions": ["tabs"],
+  "permissions": ["tabs","activeTab","webRequest", "<all_urls>", "webRequestBlocking", "storage"],
   "background": {
-    "scripts": ["mainURL.js"],
+    "scripts": ["mainURL.js", "block.js"],
     "persistent": true
   },
   "browser_action": {

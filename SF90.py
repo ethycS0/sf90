@@ -12,7 +12,7 @@ import whois
 from datetime import date, datetime
 import time
 from dateutil.parser import parse as date_parse
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 import json
 import pickle
 import time
@@ -28,11 +28,21 @@ import warnings
 warnings.filterwarnings('ignore')
 
 hostName = "0.0.0.0"
-serverPort = 8898
+serverPort = 8000
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
-        url = self.path[1:]
+        # url = self.path[1:]
+        parsed_url = urlparse(self.path)
+        query_params = parse_qs(parsed_url.query)
+
+        # Get the value of the 'url' parameter
+        url = query_params.get('url', [''])[0]
+
+        # Do something with the 'url' parameter
+        print('Received URL parameter:', url)
+        url_param = query_params.get('url', [''])[0]
+
         # print(self.path[1:])
         loaded_model = pickle.load(open("models/main.pkl", "rb"))
         obj = FeaturesFinder(url)
@@ -44,23 +54,20 @@ class MyServer(BaseHTTPRequestHandler):
         print("Prediction processing finished --- %s seconds ---" % (time.time() - start_time))
         print("URL is: ", y_predicted)
         if y_predicted == 1:
-            print("URL '"+url+"' is safe!")
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("is safe", "utf-8"))
+            response_data = {'safety': '1', 'url_param': url_param}
         elif y_predicted == 0:
-            print("URL '"+url+"' is suspicious!")
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("is suspicious", "utf-8"))
+            response_data = {'safety': '0', 'url_param': url_param}
         elif y_predicted == -1:
-            print("URL '"+url+"' is malicious!")
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("malicious", "utf-8"))
+            response_data = {'safety': '-1', 'url_param': url_param}
+       
+
+        
+        response_json = json.dumps(response_data)
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(bytes(response_json, 'utf-8'))
+
 
 
 class FeaturesFinder:
