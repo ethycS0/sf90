@@ -28,7 +28,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 hostName = "0.0.0.0"
-serverPort = 8898
+serverPort = 8000
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -61,7 +61,7 @@ class MyServer(BaseHTTPRequestHandler):
             response_data = {'safety': '-1', 'url_param': url_param}
        
 
-        
+        # print(response_data)
         response_json = json.dumps(response_data)
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
