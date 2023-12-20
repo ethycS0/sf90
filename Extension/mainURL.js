@@ -7,7 +7,7 @@ function logNewTabUrl(tabId, changeInfo, tab) {
 
         if (isInternetLink(tabUrl)) {
             if (!isSameDomainAsLastTabs(tabUrl)) {
-                sendGetRequest('http://122.170.245.130:8000', { url: tabUrl })
+                sendGetRequest('http://10.70.83.105:8000', { url: tabUrl })
                     .then(response => response.json())
                     .then(data => {
                         console.log('Server Response:', data);
@@ -50,6 +50,7 @@ function extractDomain(url) {
 }
 
 
+
 browser.tabs.onUpdated.addListener(logNewTabUrl);
 
 
@@ -71,14 +72,7 @@ function isInternetLink(tabUrl) {
 
 browser.tabs.onUpdated.addListener(logNewTabUrl);
 
-browser.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      if (request.action == "getLinks") {
-        browser.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-          browser.tabs.sendMessage(tabs[0].id, { action: "getLinks" }, function(response) {
-            sendResponse(response);
-          });
-        });
-      }
-    }
-  );
+
+
+
+  

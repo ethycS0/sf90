@@ -11,12 +11,3 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       document.body.appendChild(warningBanner);
     }
   });
-
-browser.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      if (request.action == "getLinks") {
-        const links = Array.from(document.querySelectorAll('a')).map(link => link.href);
-        sendResponse({ links });
-      }
-    }
-  );
